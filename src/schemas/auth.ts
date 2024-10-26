@@ -1,6 +1,6 @@
 import * as zod from "zod";
 
-export const LoginSchema = zod.object({
+export const loginSchema = zod.object({
     email: zod
         .string()
         .min(1, {
@@ -11,7 +11,7 @@ export const LoginSchema = zod.object({
         message: "Password is required",
     }),
 });
-export const RegisterSchema = zod
+export const registerSchema = zod
     .object({
         email: zod
             .string()
@@ -25,8 +25,8 @@ export const RegisterSchema = zod
         passwordConfirm: zod.string().min(6, {
             message: "Password should be at least 6 characters long",
         }),
-        username: zod.string().min(1, {
-            message: "username is required",
+        name: zod.string().min(1, {
+            message: "name is required",
         }),
     })
     .superRefine(({ password, passwordConfirm }, ctx) => {

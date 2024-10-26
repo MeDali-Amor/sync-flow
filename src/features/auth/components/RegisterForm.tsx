@@ -1,22 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { RegisterSchema } from "@/schemas/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import * as zod from "zod";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import FormError from "@/features/shared/FormError";
 import FormSuccess from "@/features/shared/FormSuccess";
+import { registerSchema } from "@/schemas/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as zod from "zod";
+import { useRegister } from "./api/useRegister";
 
 const defaultValues = {
     email: "",
@@ -26,26 +25,13 @@ const defaultValues = {
 };
 
 const RegisterForm = () => {
-    const [isPending, startTransition] = useTransition();
-    const [error, setError] = useState<string | undefined>(undefined);
-    const [success, setSuccess] = useState<string | undefined>(undefined);
-    const form = useForm<zod.infer<typeof RegisterSchema>>({
-        resolver: zodResolver(RegisterSchema),
+    const { isPending, error, isSuccess, mutate } = useRegister();
+    const form = useForm<zod.infer<typeof registerSchema>>({
+        resolver: zodResolver(registerSchema),
         defaultValues,
     });
-    const onSubmit = (values: zod.infer<typeof RegisterSchema>) => {
-        setError(undefined);
-        setSuccess(undefined);
-        startTransition(() => {
-            console.log(values);
-            // register(values).then((data) => {
-            //     setSuccess(data.success);
-            //     if (data.success) {
-            //         form.reset();
-            //     }
-            //     setError(data.error);
-            // });
-        });
+    const onSubmit = (values: zod.infer<typeof registerSchema>) => {
+        mutate({ json: values });
     };
     return (
         <Form {...form}>
@@ -55,7 +41,7 @@ const RegisterForm = () => {
             >
                 <FormField
                     control={form.control}
-                    name="username"
+                    name="name"
                     render={({ field }) => (
                         <FormItem className="w-full">
                             <FormControl>
@@ -119,14 +105,19 @@ const RegisterForm = () => {
                         </FormItem>
                     )}
                 />
-                {error && <FormError message={error} />}
-                {success && <FormSuccess message={success} />}
+
                 <Button
                     className="w-full rounded-sm text-sm font-semibold"
                     size={"lg"}
                 >
                     Create an account
                 </Button>
+                <div className="w-full">
+                    {error && <FormError message={error.message} />}
+                    {isSuccess && (
+                        <FormSuccess message={"Logged in successfully"} />
+                    )}
+                </div>
             </form>
         </Form>
     );

@@ -1,12 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import * as zod from "zod";
-import { LoginSchema } from "@/schemas/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Form,
     FormControl,
@@ -14,31 +8,28 @@ import {
     FormItem,
     FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import FormError from "@/features/shared/FormError";
 import FormSuccess from "@/features/shared/FormSuccess";
+import { loginSchema } from "@/schemas/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as zod from "zod";
+import { useLogin } from "./api/useLogin";
 
 const LoginForm = () => {
-    const [isPending, startTransition] = useTransition();
-    const [error, setError] = useState<string | undefined>(undefined);
-    const [success, setSuccess] = useState<string | undefined>(undefined);
-    const form = useForm<zod.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+    const { mutate, error, isSuccess, isPending } = useLogin();
+
+    const form = useForm<zod.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
             password: "",
         },
     });
-    const onSubmit = (values: zod.infer<typeof LoginSchema>) => {
-        setError(undefined);
-        setSuccess(undefined);
-        startTransition(() => {
-            console.log(values);
-            // login(values).then((data) => {
-            //     setSuccess(data?.success);
-            //     setError(data?.error);
-            //     // console.log(data);
-            // });
-        });
+
+    const onSubmit = (values: zod.infer<typeof loginSchema>) => {
+        mutate({ json: values });
     };
 
     return (
@@ -81,14 +72,18 @@ const LoginForm = () => {
                     )}
                 />
                 {/* {authError && <FormError message={authError} />} */}
-                {error && <FormError message={error} />}
-                {success && <FormSuccess message={success} />}
                 <Button
                     className="w-full rounded-sm text-sm font-semibold"
                     size={"lg"}
                 >
                     Continue
-                </Button>
+                </Button>{" "}
+                <div className="w-full">
+                    {error && <FormError message={error.message} />}
+                    {isSuccess && (
+                        <FormSuccess message={"Logged in successfully"} />
+                    )}
+                </div>
             </form>
         </Form>
     );
