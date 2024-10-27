@@ -30,6 +30,7 @@ const RegisterForm = () => {
         resolver: zodResolver(registerSchema),
         defaultValues,
     });
+
     const onSubmit = (values: zod.infer<typeof registerSchema>) => {
         mutate({ json: values });
     };
